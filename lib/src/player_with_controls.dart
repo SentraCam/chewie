@@ -5,8 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
-class PlayerWithControls extends StatelessWidget {
+class PlayerWithControls extends StatefulWidget {
   const PlayerWithControls({super.key});
+
+  @override
+  State<PlayerWithControls> createState() => _PlayerWithControlsState();
+}
+
+class _PlayerWithControlsState extends State<PlayerWithControls> {
+  final GlobalKey _videoKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +27,9 @@ class PlayerWithControls extends StatelessWidget {
       return width > height ? width / height : height / width;
     }
 
-    Widget buildOverlay(BuildContext context) {
+    Widget buildOverlay(BuildContext context, Size? size) {
       if (chewieController.overlayBuilder != null) {
-        return chewieController.overlayBuilder!(context);
+        return chewieController.overlayBuilder!(context, size);
       } else if (chewieController.overlay != null) {
         return chewieController.overlay!;
       }
@@ -42,7 +49,12 @@ class PlayerWithControls extends StatelessWidget {
       ChewieController chewieController,
       BuildContext context,
     ) {
+      final RenderBox? renderBox =
+          _videoKey.currentContext?.findRenderObject() as RenderBox?;
+      final size = renderBox?.size;
+
       return Stack(
+        fit: StackFit.expand,
         children: <Widget>[
           if (chewieController.placeholder != null)
             chewieController.placeholder!,
@@ -55,11 +67,14 @@ class PlayerWithControls extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: chewieController.aspectRatio ??
                     chewieController.videoPlayerController.value.aspectRatio,
-                child: VideoPlayer(chewieController.videoPlayerController),
+                child: VideoPlayer(
+                  chewieController.videoPlayerController,
+                  key: _videoKey,
+                ),
               ),
             ),
           ),
-          buildOverlay(context),
+          buildOverlay(context, size),
           if (Theme.of(context).platform != TargetPlatform.iOS)
             Consumer<PlayerNotifier>(
               builder: (

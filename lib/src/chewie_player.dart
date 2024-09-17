@@ -331,7 +331,7 @@ class ChewieController extends ChangeNotifier {
     double? materialSeekButtonSize,
     Widget? placeholder,
     Widget? overlay,
-    Widget Function(BuildContext)? overlayBuilder,
+    Widget Function(BuildContext, Size?)? overlayBuilder,
     bool? showControlsOnInitialize,
     bool? showOptions,
     Future<void> Function(BuildContext, List<OptionItem>)? optionsBuilder,
@@ -425,7 +425,7 @@ class ChewieController extends ChangeNotifier {
 
   static const defaultHideControlsTimer = Duration(seconds: 3);
 
-  final Widget Function(BuildContext context)? overlayBuilder;
+  final Widget Function(BuildContext context, Size? size)? overlayBuilder;
 
   /// If false, the options button in MaterialUI and MaterialDesktopUI
   /// won't be shown.
