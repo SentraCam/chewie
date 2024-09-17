@@ -57,8 +57,13 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
       return width > height ? width / height : height / width;
     }
 
-    Widget buildOverlay(BuildContext context, Size? size) {
+    Widget buildOverlay(BuildContext context) {
       if (widget.overlayBuilder != null) {
+        final RenderBox? renderBox = _videoKey.currentContext != null
+            ? _videoKey.currentContext!.findRenderObject() as RenderBox?
+            : null;
+        final size = renderBox?.size;
+
         return widget.overlayBuilder!(context, size);
       } else if (chewieController.overlay != null) {
         return chewieController.overlay!;
@@ -76,7 +81,7 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
     }
 
     Widget buildPlayerWithControls(
-        ChewieController chewieController, BuildContext context, Size? size) {
+        ChewieController chewieController, BuildContext context) {
       return Stack(
         children: <Widget>[
           if (chewieController.placeholder != null)
@@ -97,7 +102,7 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
               ),
             ),
           ),
-          Center(child: buildOverlay(context, size)),
+          Center(child: buildOverlay(context)),
           if (Theme.of(context).platform != TargetPlatform.iOS)
             Consumer<PlayerNotifier>(
               builder: (
@@ -132,17 +137,13 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
 
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      final RenderBox? renderBox =
-          _videoKey.currentContext?.findRenderObject() as RenderBox?;
-      final size = renderBox?.size;
-
       return Center(
         child: SizedBox(
           height: constraints.maxHeight,
           width: constraints.maxWidth,
           child: AspectRatio(
             aspectRatio: calculateAspectRatio(context),
-            child: buildPlayerWithControls(chewieController, context, size),
+            child: buildPlayerWithControls(chewieController, context),
           ),
         ),
       );
