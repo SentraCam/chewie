@@ -28,10 +28,12 @@ class Chewie extends StatefulWidget {
   const Chewie({
     super.key,
     required this.controller,
+    this.overlayBuilder,
   });
 
   /// The [ChewieController]
   final ChewieController controller;
+  final Widget Function(BuildContext context, Size? size)? overlayBuilder;
 
   @override
   ChewieState createState() {
@@ -89,7 +91,9 @@ class ChewieState extends State<Chewie> {
       controller: widget.controller,
       child: ChangeNotifierProvider<PlayerNotifier>.value(
         value: notifier,
-        builder: (context, w) => const PlayerWithControls(),
+        builder: (context, w) => PlayerWithControls(
+          overlayBuilder: widget.overlayBuilder,
+        ),
       ),
     );
   }
@@ -132,7 +136,9 @@ class ChewieState extends State<Chewie> {
       controller: widget.controller,
       child: ChangeNotifierProvider<PlayerNotifier>.value(
         value: notifier,
-        builder: (context, w) => const PlayerWithControls(),
+        builder: (context, w) => PlayerWithControls(
+          overlayBuilder: widget.overlayBuilder,
+        ),
       ),
     );
 
@@ -279,7 +285,6 @@ class ChewieController extends ChangeNotifier {
     this.materialSeekButtonSize = 26,
     this.placeholder,
     this.overlay,
-    this.overlayBuilder,
     this.showControlsOnInitialize = true,
     this.showOptions = true,
     this.optionsBuilder,
@@ -331,7 +336,6 @@ class ChewieController extends ChangeNotifier {
     double? materialSeekButtonSize,
     Widget? placeholder,
     Widget? overlay,
-    Widget Function(BuildContext, Size?)? overlayBuilder,
     bool? showControlsOnInitialize,
     bool? showOptions,
     Future<void> Function(BuildContext, List<OptionItem>)? optionsBuilder,
@@ -387,7 +391,6 @@ class ChewieController extends ChangeNotifier {
           materialSeekButtonSize ?? this.materialSeekButtonSize,
       placeholder: placeholder ?? this.placeholder,
       overlay: overlay ?? this.overlay,
-      overlayBuilder: overlayBuilder ?? this.overlayBuilder,
       showControlsOnInitialize:
           showControlsOnInitialize ?? this.showControlsOnInitialize,
       showOptions: showOptions ?? this.showOptions,
@@ -424,8 +427,6 @@ class ChewieController extends ChangeNotifier {
   }
 
   static const defaultHideControlsTimer = Duration(seconds: 3);
-
-  final Widget Function(BuildContext context, Size? size)? overlayBuilder;
 
   /// If false, the options button in MaterialUI and MaterialDesktopUI
   /// won't be shown.

@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class PlayerWithControls extends StatefulWidget {
-  const PlayerWithControls({super.key});
+  const PlayerWithControls({super.key, this.overlayBuilder});
+  final Widget Function(BuildContext context, Size? size)? overlayBuilder;
 
   @override
   State<PlayerWithControls> createState() => _PlayerWithControlsState();
@@ -57,8 +58,8 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
     }
 
     Widget buildOverlay(BuildContext context, Size? size) {
-      if (chewieController.overlayBuilder != null) {
-        return chewieController.overlayBuilder!(context, size);
+      if (widget.overlayBuilder != null) {
+        return widget.overlayBuilder!(context, size);
       } else if (chewieController.overlay != null) {
         return chewieController.overlay!;
       }
