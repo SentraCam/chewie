@@ -14,6 +14,35 @@ class PlayerWithControls extends StatefulWidget {
 
 class _PlayerWithControlsState extends State<PlayerWithControls> {
   final GlobalKey _videoKey = GlobalKey();
+  bool _isFullScreen = false;
+  ChewieController? _chewieController;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _chewieController = ChewieController.of(context);
+      _chewieController!.addListener(_rebuild);
+      _rebuild();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _chewieController?.removeListener(_rebuild);
+    super.dispose();
+  }
+
+  _rebuild() {
+    if (!mounted || _chewieController == null) return;
+
+    if (_chewieController!.isFullScreen && !_isFullScreen) {
+      _isFullScreen = _chewieController!.isFullScreen;
+      Future.delayed(const Duration(milliseconds: 200), () {
+        setState(() {});
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +83,6 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
       final size = renderBox?.size;
 
       return Stack(
-        fit: StackFit.expand,
         children: <Widget>[
           if (chewieController.placeholder != null)
             chewieController.placeholder!,
@@ -74,7 +102,7 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
               ),
             ),
           ),
-          buildOverlay(context, size),
+          Center(child: buildOverlay(context, size)),
           if (Theme.of(context).platform != TargetPlatform.iOS)
             Consumer<PlayerNotifier>(
               builder: (
