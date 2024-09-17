@@ -39,7 +39,7 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
 
     if (_chewieController!.isFullScreen && !_isFullScreen) {
       _isFullScreen = _chewieController!.isFullScreen;
-      Future.delayed(const Duration(milliseconds: 200), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         setState(() {});
       });
     }
@@ -76,13 +76,7 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
     }
 
     Widget buildPlayerWithControls(
-      ChewieController chewieController,
-      BuildContext context,
-    ) {
-      final RenderBox? renderBox =
-          _videoKey.currentContext?.findRenderObject() as RenderBox?;
-      final size = renderBox?.size;
-
+        ChewieController chewieController, BuildContext context, Size? size) {
       return Stack(
         children: <Widget>[
           if (chewieController.placeholder != null)
@@ -138,13 +132,17 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
 
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
+      final RenderBox? renderBox =
+          _videoKey.currentContext?.findRenderObject() as RenderBox?;
+      final size = renderBox?.size;
+
       return Center(
         child: SizedBox(
           height: constraints.maxHeight,
           width: constraints.maxWidth,
           child: AspectRatio(
             aspectRatio: calculateAspectRatio(context),
-            child: buildPlayerWithControls(chewieController, context),
+            child: buildPlayerWithControls(chewieController, context, size),
           ),
         ),
       );
