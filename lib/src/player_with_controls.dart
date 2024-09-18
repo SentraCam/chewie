@@ -17,6 +17,7 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
   final GlobalKey _videoKey = GlobalKey();
   bool _isFullScreen = false;
   ChewieController? _chewieController;
+  final ValueNotifier<Size> notifier = ValueNotifier(const Size(0, 0));
 
   @override
   void initState() {
@@ -59,12 +60,20 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
 
     Widget buildOverlay(BuildContext context) {
       if (widget.overlayBuilder != null) {
-        final RenderBox? renderBox = _videoKey.currentContext != null
-            ? _videoKey.currentContext!.findRenderObject() as RenderBox?
-            : null;
-        final size = renderBox?.size;
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) {
+            notifier.value =
+                (_videoKey.currentContext!.findRenderObject() as RenderBox)
+                    .size;
+          },
+        );
 
-        return widget.overlayBuilder!(context, size);
+        return ValueListenableBuilder(
+          valueListenable: notifier,
+          builder: (context, value, child) {
+            return widget.overlayBuilder!(context, value);
+          },
+        );
       } else if (chewieController.overlay != null) {
         return chewieController.overlay!;
       }
