@@ -16,6 +16,7 @@ class PlayerWithControls extends StatefulWidget {
 class _PlayerWithControlsState extends State<PlayerWithControls> {
   final GlobalKey _videoKey = GlobalKey();
   bool _isFullScreen = false;
+  bool _isPlaying = false;
   ChewieController? _chewieController;
   final ValueNotifier<Size> notifier = ValueNotifier(const Size(0, 0));
 
@@ -37,11 +38,20 @@ class _PlayerWithControlsState extends State<PlayerWithControls> {
 
   _rebuild() {
     if (!mounted || _chewieController == null) return;
+    _isPlaying = _chewieController!.videoPlayerController.value.isPlaying;
 
-    if (_chewieController!.isFullScreen && !_isFullScreen) {
+    if (_chewieController!.isFullScreen != _isFullScreen) {
       _isFullScreen = _chewieController!.isFullScreen;
+
       Future.delayed(const Duration(milliseconds: 500), () {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (_isPlaying) {
+            _chewieController!.play();
+          }
+        });
       });
     }
   }
