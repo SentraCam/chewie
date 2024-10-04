@@ -332,7 +332,10 @@ class _MaterialDesktopControlsState extends State<MaterialDesktopControls>
         _latestValue.duration.inSeconds > 0;
     final bool showPlayButton =
         widget.showPlayButton && !_dragging && !notifier.hideStuff;
-
+    // Hide button when the video controller registers that the stream is done
+    if (isFinished && _chewieController != null && _chewieController!.isLive) {
+      return const SizedBox();
+    }
     return GestureDetector(
       onTap: () {
         if (_latestValue.isPlaying) {
