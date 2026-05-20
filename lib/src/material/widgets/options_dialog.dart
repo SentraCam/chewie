@@ -28,7 +28,7 @@ class _OptionsDialogState extends State<OptionsDialog> {
             itemCount: widget.options.length,
             itemBuilder: (context, i) {
               return ListTile(
-                onTap: widget.options[i].onTap,
+                onTap: () => widget.options[i].onTap(context),
                 leading: Icon(widget.options[i].iconData),
                 title: Text(widget.options[i].title),
                 subtitle: widget.options[i].subtitle != null
@@ -39,16 +39,12 @@ class _OptionsDialogState extends State<OptionsDialog> {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Divider(
-              thickness: 1.0,
-            ),
+            child: Divider(thickness: 1.0),
           ),
           ListTile(
             onTap: () => Navigator.pop(context),
             leading: const Icon(Icons.close),
-            title: Text(
-              widget.cancelButtonText ?? 'Cancel',
-            ),
+            title: Text(widget.cancelButtonText ?? 'Cancel'),
           ),
         ],
       ),

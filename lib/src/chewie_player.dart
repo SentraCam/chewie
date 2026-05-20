@@ -43,6 +43,8 @@ class Chewie extends StatefulWidget {
 
 class ChewieState extends State<Chewie> {
   bool _isFullScreen = false;
+  bool _wasPlayingBeforeFullScreen = false;
+  bool _resumeAppliedInFullScreen = false;
 
   bool get isControllerFullScreen => widget.controller.isFullScreen;
   late PlayerNotifier notifier;
@@ -74,6 +76,9 @@ class ChewieState extends State<Chewie> {
 
   Future<void> listener() async {
     if (isControllerFullScreen && !_isFullScreen) {
+      _wasPlayingBeforeFullScreen =
+          widget.controller.videoPlayerController.value.isPlaying;
+      _resumeAppliedInFullScreen = false;
       _isFullScreen = isControllerFullScreen;
       await _pushFullScreenWidget(context);
     } else if (_isFullScreen) {
@@ -142,6 +147,22 @@ class ChewieState extends State<Chewie> {
       ),
     );
 
+    if (kIsWeb && !_resumeAppliedInFullScreen) {
+      _resumeAppliedInFullScreen = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final vpc = widget.controller.videoPlayerController;
+        await vpc.pause();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        if (_wasPlayingBeforeFullScreen) {
+          await vpc.play();
+        } else {
+          await vpc.play();
+          await vpc.pause();
+        }
+      });
+    }
+
     if (widget.controller.routePageBuilder == null) {
       return _defaultRoutePageBuilder(
         context,
@@ -174,8 +195,10 @@ class ChewieState extends State<Chewie> {
       rootNavigator: widget.controller.useRootNavigator,
     ).push(route);
 
+    final wasPlaying = widget.controller.videoPlayerController.value.isPlaying;
+
     if (kIsWeb) {
-      _reInitializeControllers();
+      await _reInitializeControllers(wasPlaying);
     }
 
     _isFullScreen = false;
@@ -245,16 +268,23 @@ class ChewieState extends State<Chewie> {
     }
   }
 
-  ///When viewing full screen on web, returning from full screen causes original video to lose the picture.
-  ///We re initialise controllers for web only when returning from full screen
-  void _reInitializeControllers() {
+  /// When viewing full screen on web, returning from full screen could cause
+  /// the original video element to lose the picture. We re-initialize the
+  /// controllers for web only when returning from full screen and preserve
+  /// the previous play/pause state.
+  Future<void> _reInitializeControllers(bool wasPlaying) async {
     final prevPosition = widget.controller.videoPlayerController.value.position;
-    widget.controller.videoPlayerController.initialize().then((_) async {
-      widget.controller._initialize();
-      widget.controller.videoPlayerController.seekTo(prevPosition);
+
+    await widget.controller.videoPlayerController.initialize();
+    widget.controller._initialize();
+    await widget.controller.videoPlayerController.seekTo(prevPosition);
+
+    if (wasPlaying) {
       await widget.controller.videoPlayerController.play();
-      widget.controller.videoPlayerController.pause();
-    });
+    } else {
+      await widget.controller.videoPlayerController.play();
+      await widget.controller.videoPlayerController.pause();
+    }
   }
 }
 
@@ -294,6 +324,7 @@ class ChewieController extends ChangeNotifier {
     this.zoomAndPan = false,
     this.maxScale = 2.5,
     this.subtitle,
+    this.showSubtitles = false,
     this.subtitleBuilder,
     this.customControls,
     this.errorBuilder,
@@ -313,6 +344,7 @@ class ChewieController extends ChangeNotifier {
     this.progressIndicatorDelay,
     this.hideControlsTimer = defaultHideControlsTimer,
     this.controlsSafeAreaMinimum = EdgeInsets.zero,
+    this.pauseOnBackgroundTap = false,
   }) : assert(
           playbackSpeeds.every((speed) => speed > 0),
           'The playbackSpeeds values must all be greater than 0',
@@ -345,6 +377,7 @@ class ChewieController extends ChangeNotifier {
     bool? zoomAndPan,
     double? maxScale,
     Subtitles? subtitle,
+    bool? showSubtitles,
     Widget Function(BuildContext, dynamic)? subtitleBuilder,
     Widget? customControls,
     WidgetBuilder? bufferingBuilder,
@@ -369,6 +402,7 @@ class ChewieController extends ChangeNotifier {
       Animation<double>,
       ChewieControllerProvider,
     )? routePageBuilder,
+    bool? pauseOnBackgroundTap,
   }) {
     return ChewieController(
       draggableProgressBar: draggableProgressBar ?? this.draggableProgressBar,
@@ -385,6 +419,12 @@ class ChewieController extends ChangeNotifier {
           cupertinoProgressColors ?? this.cupertinoProgressColors,
       materialProgressColors:
           materialProgressColors ?? this.materialProgressColors,
+      zoomAndPan: zoomAndPan ?? this.zoomAndPan,
+      maxScale: maxScale ?? this.maxScale,
+      controlsSafeAreaMinimum:
+          controlsSafeAreaMinimum ?? this.controlsSafeAreaMinimum,
+      transformationController:
+          transformationController ?? this.transformationController,
       materialSeekButtonFadeDuration:
           materialSeekButtonFadeDuration ?? this.materialSeekButtonFadeDuration,
       materialSeekButtonSize:
@@ -397,6 +437,7 @@ class ChewieController extends ChangeNotifier {
       optionsBuilder: optionsBuilder ?? this.optionsBuilder,
       additionalOptions: additionalOptions ?? this.additionalOptions,
       showControls: showControls ?? this.showControls,
+      showSubtitles: showSubtitles ?? this.showSubtitles,
       subtitle: subtitle ?? this.subtitle,
       subtitleBuilder: subtitleBuilder ?? this.subtitleBuilder,
       customControls: customControls ?? this.customControls,
@@ -423,6 +464,7 @@ class ChewieController extends ChangeNotifier {
       hideControlsTimer: hideControlsTimer ?? this.hideControlsTimer,
       progressIndicatorDelay:
           progressIndicatorDelay ?? this.progressIndicatorDelay,
+      pauseOnBackgroundTap: pauseOnBackgroundTap ?? this.pauseOnBackgroundTap,
     );
   }
 
@@ -460,6 +502,12 @@ class ChewieController extends ChangeNotifier {
   /// Add a List of Subtitles here in `Subtitles.subtitle`
   Subtitles? subtitle;
 
+  /// Determines whether subtitles should be shown by default when the video starts.
+  ///
+  /// If set to `true`, subtitles will be displayed automatically when the video
+  /// begins playing. If set to `false`, subtitles will be hidden by default.
+  bool showSubtitles;
+
   /// The controller for the video you want to play
   final VideoPlayerController videoPlayerController;
 
@@ -484,10 +532,14 @@ class ChewieController extends ChangeNotifier {
   /// Whether or not to show the controls at all
   final bool showControls;
 
-  /// Controller to pass into the [InteractiveViewer] component
+  /// Controller to pass into the [InteractiveViewer] component.
+  /// If it is required to control the transformation only via the controller,
+  /// `zoomAndPan` should be set to false.
   final TransformationController? transformationController;
 
-  /// Whether or not to allow zooming and panning
+  /// Whether or not to allow zooming and panning.
+  /// This can still be false, and the `transformationController` can be used to control the
+  /// transformation.
   final bool zoomAndPan;
 
   /// Max scale when zooming
@@ -580,6 +632,9 @@ class ChewieController extends ChangeNotifier {
   /// Adds additional padding to the controls' [SafeArea] as desired.
   /// Defaults to [EdgeInsets.zero].
   final EdgeInsets controlsSafeAreaMinimum;
+
+  /// Defines if the player should pause when the background is tapped
+  final bool pauseOnBackgroundTap;
 
   static ChewieController of(BuildContext context) {
     final chewieControllerProvider =

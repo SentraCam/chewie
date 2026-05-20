@@ -1,3 +1,69 @@
+## [1.14.1]
+* 🛠️ [#945](https://github.com/fluttercommunity/chewie/pull/945): Flutter 3.38 downgrade. Thanks [diegotori](https://github.com/diegotori).
+* Library now supports Flutter and Dart versions `3.38.0` and `3.10` or higher respectively, restoring previous compatibility.
+
+## [1.14.0]
+* 🛠️ [#944](https://github.com/fluttercommunity/chewie/pull/944): Flutter 3.41 Upgrade. Thanks [diegotori](https://github.com/diegotori).
+* **BREAKING CHANGE**: Library now requires at least Flutter version `3.41.0` or higher due to 
+  `wakelock_plus`'s upgrade to version `1.6.0`, which now requires this minimum Flutter version.
+
+## [1.13.1]
+* 🛠️ [#940](https://github.com/fluttercommunity/chewie/pull/940): fix: add mounted check in _startHideTimer to prevent setState after dispose. Thanks [Cleparr](https://github.com/Cleparr).
+
+## [1.13.0]
+* 🛠️ [#927](https://github.com/fluttercommunity/chewie/pull/927): Fix(web): Keep playback when entering/exiting fullscreen on web. Thanks [victorspringer](https://github.com/victorspringer).
+* **BREAKING CHANGE**: Library now requires at least Flutter version `3.32.0` or higher.
+
+## [1.12.1]
+* 🛠️ [#920](https://github.com/fluttercommunity/chewie/pull/920): Fix zoomAndPan not having an effect. Thanks [abalmagd](https://github.com/abalmagd).
+
+## [1.12.0]
+* 🛠️ [#923](https://github.com/fluttercommunity/chewie/pull/923): Flutter 3.29 minimum version. Thanks [diegotori](https://github.com/diegotori).
+* **BREAKING CHANGE**: Library now requires at least Flutter version `3.29.0` or higher.
+
+## [1.11.3]
+* 🛠️ [#917](https://github.com/fluttercommunity/chewie/pull/917): Resolve issue where 'subtitleOn' doesn't enable subtitles by default on iOS. Thanks [alideep5](https://github.com/alideep5).
+
+## [1.11.2]
+* 🛠️ [#912](https://github.com/fluttercommunity/chewie/pull/912): Add workaround for invalid buffering info on android. Thanks [timoxd7](https://github.com/timoxd7).
+
+## [1.11.1]
+* ⬆️ [#875](https://github.com/fluttercommunity/chewie/pull/875): Add background tap to pause video feature. Thanks [Ortes](https://github.com/Ortes).
+* 🛠️ [#896](https://github.com/fluttercommunity/chewie/pull/896): Fixed allowMute being ignored on Desktop. Thanks [mpoimer](https://github.com/mpoimer).
+* 🛠️ [#910](https://github.com/fluttercommunity/chewie/pull/910): Fix example on web. Thanks [Ortes](https://github.com/Ortes).
+
+## [1.11.0]
+* ⬆️ [#900](https://github.com/fluttercommunity/chewie/pull/900): Flutter `3.29` upgrade. Thanks [diegotori](https://github.com/diegotori).
+* **BREAKING CHANGE**: Library now requires at least Flutter version `3.27.0`, for real this time.
+
+## [1.10.0]
+* 🛠️ [#871](https://github.com/fluttercommunity/chewie/pull/871): Fixed pop the wrong page when changing the speed. Thanks [akmalova](https://github.com/akmalova).
+* **BREAKING CHANGES**: 
+  * `OptionItem.onTap` now takes in a `BuildContext`.
+  * `OptionItem`'s properties are now marked as `final`. Use `copyWith` to mutate its properties into
+    a new instance.
+
+## [1.9.2]
+* Fixed broken Table of Contents links in `README.md`, take two.
+
+## [1.9.1+1]
+* Fixed broken Table of Contents links in `README.md`.
+
+## [1.9.1]
+* [#872](https://github.com/fluttercommunity/chewie/pull/872): feat: Add showSubtitles flag to control subtitles (#648). Thanks [floodoo](https://github.com/floodoo).
+* [#890](https://github.com/fluttercommunity/chewie/pull/890): Fix issue 888. Thanks [diegotori](https://github.com/diegotori).
+* **IMPORTANT**: Relaxed the minimum supported Flutter version to `3.24`. 
+  From now on, this library will make a best effort to support the latest `N-1` Flutter version at the minimum.
+
+## [1.9.0]
+* **BREAKING CHANGE**: Library now requires at least Flutter version `3.27.0`.
+
+## [1.8.7]
+* ⬆️ [#876](https://github.com/fluttercommunity/chewie/pull/876): Add keyboard controls seek forward and backward and fullscreen escape on desktop. Thanks [Ortes](https://github.com/Ortes).
+
+## [1.8.6]
+* ⬆️ [#874](https://github.com/fluttercommunity/chewie/pull/874): Add `devtools_options.yaml` configuration files. Thanks [MoRmdn](https://github.com/MoRmdn).
+
 ## [1.8.5]
 * ⬆️ [#703](https://github.com/fluttercommunity/chewie/pull/703): Adding Seek buttons for Android. Thanks [GyanendroKh](https://github.com/GyanendroKh).
 * Upgraded `wakelock_plus` to version `1.2.8`, which uses `web` version `1.0.0`. Thanks [diegotori](https://github.com/diegotori).
@@ -338,4 +404,3 @@ Initial version of Chewie, the video player with a heart of gold.
   * Includes Material Player Controls
   * Includes Cupertino Player Controls
   * Spike version: Focus on good looking UI. Internal code is sloppy, needs a refactor and tests
-
